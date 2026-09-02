@@ -1,20 +1,20 @@
 # 📦 PrestamoHub - Sistema de Gestión de Préstamo de Elementos
 
-**Versión:** 1.0.  
-**Fecha:** 2026
+**Versión:** 2.0  
+**Fecha:** 2026  
 
 ---
 
 ## 📋 Descripción
 
-**PrestamoHub** (Gestión de Préstamo de Elementos) es un sistema de escritorio desarrollado en Python que permite administrar el préstamo y devolución de elementos organizados por categorías. El sistema está diseñado para pequeñas y medianas organizaciones que necesitan controlar el inventario de sus recursos.
+**PrestamoHub** (Gestión de Préstamo de Elementos) es un sistema de escritorio desarrollado en Python que permite administrar el préstamo y devolución de elementos organizados por categorías.
 
 ### 🎯 Características Principales
 
 - 📊 **Gestión de Inventario**: Registro, edición y eliminación de elementos
 - 📂 **Organización por Categorías**: Deportes, Informática, Audiovisuales, Herramientas
 - 🔄 **Préstamos y Devoluciones**: Control completo de movimientos
-- 👥 **Gestión de Usuarios**: Registro y administración de usuarios
+- 👥 **Gestión de Usuarios**: Registro por nombre, email y teléfono
 - 📈 **Estadísticas en Tiempo Real**: Visualización de disponibilidad
 - 📋 **Historial de Préstamos**: Seguimiento completo de cada elemento
 - 💾 **Persistencia Automática**: Guardado automático en JSON
@@ -24,18 +24,8 @@
 
 ## 🏗️ Arquitectura del Sistema
 
-El sistema sigue una arquitectura **MVC** (Modelo-Vista-Controlador) simplificada:
+El sistema sigue una arquitectura **MVC** (Modelo-Vista-Controlador):
 
-
-
-### 📐 Capas del Sistema
-
-| Capa | Archivo | Responsabilidad |
-|------|---------|-----------------|
-| **Modelo** | `modelo.py` | Lógica de negocio, gestión de datos, validaciones |
-| **Controlador** | `controlador.py` | Conecta modelo con vista, maneja eventos del usuario |
-| **Vista** | `vista.py` | Interfaz gráfica, captura de eventos, visualización |
-| **Persistencia** | `datos.json` | Almacenamiento de datos en formato JSON |
 
 ---
 
@@ -46,13 +36,8 @@ El sistema sigue una arquitectura **MVC** (Modelo-Vista-Controlador) simplificad
 - Python 3.8 o superior
 - Tkinter (incluido en Python por defecto)
 
-### Instalación
-
-1. **Clonar o descargar el repositorio**
+### Ejecución
 
 ```bash
-git https://github.com/Afandres/PrestamoHub.git
-cd PrestamoHub
-
 # Ejecutar el sistema
 python main.py

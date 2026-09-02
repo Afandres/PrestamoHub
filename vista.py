@@ -12,11 +12,11 @@ class Vista:
     
     def __init__(self, root):
         self.root = root
-        self.root.title("GESPRÉ - Préstamo de Elementos")
+        self.root.title("PrestamoHub - Préstamo de Elementos")
         self.root.geometry("1100x650")
         self.root.resizable(True, True)
         
-        # Callbacks (serán asignados por el controlador)
+        # Callbacks
         self.on_actualizar = None
         self.on_prestar = None
         self.on_devolver = None
@@ -26,6 +26,8 @@ class Vista:
         self.on_editar = None
         self.on_reporte = None
         self.on_estadisticas = None
+        self.on_agregar_usuario = None
+        self.on_eliminar_usuario = None
         
         # Variables
         self.filtro_estado = tk.StringVar(value="Todos")
@@ -37,7 +39,7 @@ class Vista:
         self._crear_barra_estado()
         
         # Cargar datos iniciales
-        self.actualizar()
+        self.root.after(100, self.actualizar)
     
     def _crear_menu(self):
         """Barra de menú."""
@@ -49,6 +51,7 @@ class Vista:
         menubar.add_cascade(label="Archivo", menu=menu_archivo)
         menu_archivo.add_command(label="Nuevo Elemento", command=self._nuevo_elemento)
         menu_archivo.add_command(label="Nuevo Usuario", command=self._nuevo_usuario)
+        menu_archivo.add_command(label="Ver Usuarios", command=self._ver_usuarios)
         menu_archivo.add_separator()
         menu_archivo.add_command(label="Salir", command=self.root.quit)
         
@@ -66,13 +69,13 @@ class Vista:
         frame_titulo.pack(fill=tk.X)
         tk.Label(
             frame_titulo,
-            text="🏦 GESPRÉ - Gestión de Préstamo de Elementos",
+            text="🏦 PrestamoHub - Gestión de Préstamo de Elementos",
             font=('Arial', 18, 'bold'),
             fg='white',
             bg='#2c3e50'
         ).pack(pady=10)
         
-        # Panel principal (izquierda y derecha)
+        # Panel principal
         panel = tk.Frame(self.root)
         panel.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
         
@@ -103,15 +106,17 @@ class Vista:
         
         # Filtros
         tk.Label(toolbar, text="Filtrar:").pack(side=tk.LEFT, padx=(15, 5))
-        combo = ttk.Combobox(
+        
+        self.combo_filtro = ttk.Combobox(
             toolbar,
             textvariable=self.filtro_estado,
             values=["Todos", "Disponibles", "Prestados"],
             width=12,
             state='readonly'
         )
-        combo.pack(side=tk.LEFT)
-        combo.bind('<<ComboboxSelected>>', lambda e: self.actualizar())
+        self.combo_filtro.pack(side=tk.LEFT)
+        self.combo_filtro.set("Todos")
+        self.combo_filtro.bind('<<ComboboxSelected>>', lambda e: self.actualizar())
         
         # Campo de búsqueda
         tk.Label(toolbar, text="Buscar:").pack(side=tk.LEFT, padx=(15, 5))
@@ -287,14 +292,165 @@ class Vista:
             return None
         return self.tree.item(seleccion[0])['values'][0]
     
-    # ========== EVENTOS ==========
+    # ========== USUARIOS ==========
+    
+    def _ver_usuarios(self):
+        """Muestra la lista de usuarios."""
+        if not self.on_actualizar:
+            return
+        
+        datos = self.on_actualizar()
+        usuarios = datos['usuarios']
+        
+        if not usuarios:
+            messagebox.showinfo("Usuarios", "No hay usuarios registrados")
+            return
+        
+        ventana = tk.Toplevel(self.root)
+        ventana.title("Lista de Usuarios")
+        ventana.geometry("500x400")
+        ventana.transient(self.root)
+        
+        tree = ttk.Treeview(
+            ventana,
+            columns=('nombre', 'email', 'telefono'),
+            show='headings',
+            height=15
+        )
+        
+        tree.heading('nombre', text='Nombre')
+        tree.heading('email', text='Email')
+        tree.heading('telefono', text='Teléfono')
+        
+        tree.column('nombre', width=180)
+        tree.column('email', width=180)
+        tree.column('telefono', width=120)
+        
+        scroll = ttk.Scrollbar(ventana, orient=tk.VERTICAL, command=tree.yview)
+        tree.configure(yscrollcommand=scroll.set)
+        
+        tree.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=10, pady=10)
+        scroll.pack(side=tk.RIGHT, fill=tk.Y, pady=10)
+        
+        for u in usuarios:
+            tree.insert('', 'end', values=(
+                u['nombre'],
+                u.get('email', ''),
+                u.get('telefono', '')
+            ))
+        
+        # Botón para eliminar usuario
+        def eliminar_usuario():
+            seleccion = tree.selection()
+            if not seleccion:
+                messagebox.showwarning("Advertencia", "Seleccione un usuario")
+                return
+            
+            nombre = tree.item(seleccion[0])['values'][0]
+            
+            if messagebox.askyesno("Confirmar", f"¿Eliminar al usuario '{nombre}'?"):
+                if self.on_eliminar_usuario:
+                    exito, msg = self.on_eliminar_usuario(nombre)
+                    if exito:
+                        messagebox.showinfo("Éxito", msg)
+                        ventana.destroy()
+                        self.actualizar()
+                    else:
+                        messagebox.showerror("Error", msg)
+        
+        tk.Button(
+            ventana,
+            text="🗑️ Eliminar Usuario",
+            command=eliminar_usuario,
+            bg='#e74c3c',
+            fg='white',
+            font=('Arial', 10, 'bold'),
+            width=20
+        ).pack(pady=10)
+        
+        tk.Button(
+            ventana,
+            text="Cerrar",
+            command=ventana.destroy,
+            bg='#3498db',
+            fg='white',
+            font=('Arial', 10, 'bold'),
+            width=15
+        ).pack(pady=5)
+    
+    def _nuevo_usuario(self):
+        """Agrega un nuevo usuario (sin ID)."""
+        dialog = tk.Toplevel(self.root)
+        dialog.title("Nuevo Usuario")
+        dialog.geometry("400x280")
+        dialog.resizable(False, False)
+        dialog.transient(self.root)
+        dialog.grab_set()
+        
+        campos = [
+            ("Nombre:", "nombre"),
+            ("Email:", "email"),
+            ("Teléfono:", "telefono")
+        ]
+        
+        entries = {}
+        
+        for i, (label, key) in enumerate(campos):
+            tk.Label(dialog, text=label, font=('Arial', 10, 'bold')).grid(
+                row=i, column=0, padx=10, pady=8, sticky='w'
+            )
+            entry = tk.Entry(dialog, width=35)
+            entry.grid(row=i, column=1, padx=10, pady=8)
+            entries[key] = entry
+        
+        def guardar():
+            nombre = entries['nombre'].get().strip()
+            email = entries['email'].get().strip()
+            telefono = entries['telefono'].get().strip()
+            
+            if not nombre:
+                messagebox.showerror("Error", "El nombre es obligatorio")
+                return
+            
+            if self.on_agregar_usuario:
+                exito, msg = self.on_agregar_usuario(nombre, email, telefono)
+                if exito:
+                    messagebox.showinfo("Éxito", msg)
+                    dialog.destroy()
+                    self.actualizar()
+                else:
+                    messagebox.showerror("Error", msg)
+        
+        frame_btns = tk.Frame(dialog)
+        frame_btns.grid(row=len(campos), column=0, columnspan=2, pady=20)
+        
+        tk.Button(
+            frame_btns,
+            text="Guardar",
+            command=guardar,
+            bg='#27ae60',
+            fg='white',
+            font=('Arial', 10, 'bold'),
+            width=15
+        ).pack(side=tk.LEFT, padx=5)
+        
+        tk.Button(
+            frame_btns,
+            text="Cancelar",
+            command=dialog.destroy,
+            bg='#e74c3c',
+            fg='white',
+            font=('Arial', 10, 'bold'),
+            width=15
+        ).pack(side=tk.LEFT, padx=5)
+    
+    # ========== ELEMENTOS ==========
     
     def _nuevo_elemento(self):
         """Abre diálogo para nuevo elemento."""
         if not self.on_agregar:
             return
         
-        # Ventana de diálogo
         dialog = tk.Toplevel(self.root)
         dialog.title("Nuevo Elemento")
         dialog.geometry("450x400")
@@ -302,7 +458,6 @@ class Vista:
         dialog.transient(self.root)
         dialog.grab_set()
         
-        # Campos
         campos = [
             ("Código:", "codigo"),
             ("Nombre:", "nombre"),
@@ -319,7 +474,6 @@ class Vista:
             )
             
             if key == "categoria":
-                # Obtener categorías del controlador
                 datos = self.on_actualizar()
                 entry = ttk.Combobox(dialog, values=datos['categorias'], width=35)
             elif key == "descripcion":
@@ -354,7 +508,6 @@ class Vista:
             except Exception as e:
                 messagebox.showerror("Error", str(e))
         
-        # Botones
         frame_btns = tk.Frame(dialog)
         frame_btns.grid(row=len(campos), column=0, columnspan=2, pady=20)
         
@@ -388,7 +541,6 @@ class Vista:
         if not self.on_actualizar:
             return
         
-        # Obtener datos del elemento
         datos = self.on_actualizar()
         elemento = None
         for e in datos['elementos']:
@@ -404,7 +556,6 @@ class Vista:
             messagebox.showwarning("Advertencia", "No se puede editar un elemento prestado")
             return
         
-        # Ventana de edición
         dialog = tk.Toplevel(self.root)
         dialog.title("Editar Elemento")
         dialog.geometry("450x400")
@@ -412,7 +563,6 @@ class Vista:
         dialog.transient(self.root)
         dialog.grab_set()
         
-        # Campos con valores actuales
         campos = [
             ("Código:", "codigo", elemento.codigo),
             ("Nombre:", "nombre", elemento.nombre),
@@ -512,7 +662,6 @@ class Vista:
         """Busca un elemento por código."""
         codigo = simpledialog.askstring("Buscar", "Ingrese el código:")
         if codigo:
-            # Buscar en la tabla
             for item in self.tree.get_children():
                 if self.tree.item(item)['values'][0] == codigo:
                     self.tree.selection_set(item)
@@ -520,8 +669,10 @@ class Vista:
                     return
             messagebox.showinfo("No encontrado", f"No se encontró el elemento {codigo}")
     
+    # ========== PRÉSTAMOS Y DEVOLUCIONES ==========
+    
     def _prestar(self):
-        """Realiza un préstamo."""
+        """Realiza un préstamo (usa nombre de usuario)."""
         if not self.on_prestar or not self.on_actualizar:
             return
         
@@ -530,7 +681,6 @@ class Vista:
             messagebox.showwarning("Advertencia", "Seleccione un elemento")
             return
         
-        # Verificar que esté disponible
         datos = self.on_actualizar()
         elemento = None
         for e in datos['elementos']:
@@ -546,35 +696,36 @@ class Vista:
             messagebox.showwarning("Advertencia", "No hay usuarios registrados")
             return
         
-        # Seleccionar usuario
         dialog = tk.Toplevel(self.root)
         dialog.title("Realizar Préstamo")
-        dialog.geometry("400x150")
+        dialog.geometry("400x180")
         dialog.resizable(False, False)
         dialog.transient(self.root)
         dialog.grab_set()
         
         tk.Label(dialog, text=f"Elemento: {elemento.nombre}", font=('Arial', 11, 'bold')).pack(pady=10)
-        tk.Label(dialog, text="Usuario:").pack()
+        tk.Label(dialog, text="Seleccione el usuario:").pack()
+        
+        nombres_usuarios = [u['nombre'] for u in datos['usuarios']]
         
         combo = ttk.Combobox(
             dialog,
-            values=[f"{uid} - {info['nombre']}" for uid, info in datos['usuarios'].items()],
-            width=40
+            values=nombres_usuarios,
+            width=40,
+            state='readonly'
         )
         combo.pack(pady=5)
         
         def realizar():
-            seleccion = combo.get()
-            if not seleccion:
+            nombre_usuario = combo.get()
+            if not nombre_usuario:
                 messagebox.showerror("Error", "Seleccione un usuario")
                 return
             
-            usuario_id = seleccion.split(" - ")[0]
-            exito, msg = self.on_prestar(codigo, usuario_id)
+            exito, msg = self.on_prestar(codigo, nombre_usuario)
             
             if exito:
-                messagebox.showinfo("Éxito", "Préstamo realizado")
+                messagebox.showinfo("Éxito", f"Préstamo realizado a {nombre_usuario}")
                 dialog.destroy()
                 self.actualizar()
             else:
@@ -600,7 +751,6 @@ class Vista:
             messagebox.showwarning("Advertencia", "Seleccione un elemento")
             return
         
-        # Verificar que esté prestado
         datos = self.on_actualizar()
         elemento = None
         for e in datos['elementos']:
@@ -620,83 +770,7 @@ class Vista:
             else:
                 messagebox.showerror("Error", msg)
     
-    def _nuevo_usuario(self):
-        """Agrega un nuevo usuario."""
-        dialog = tk.Toplevel(self.root)
-        dialog.title("Nuevo Usuario")
-        dialog.geometry("400x250")
-        dialog.resizable(False, False)
-        dialog.transient(self.root)
-        dialog.grab_set()
-        
-        campos = [
-            ("ID:", "id"),
-            ("Nombre:", "nombre"),
-            ("Email:", "email")
-        ]
-        
-        entries = {}
-        
-        for i, (label, key) in enumerate(campos):
-            tk.Label(dialog, text=label, font=('Arial', 10, 'bold')).grid(
-                row=i, column=0, padx=10, pady=5, sticky='w'
-            )
-            entry = tk.Entry(dialog, width=35)
-            entry.grid(row=i, column=1, padx=10, pady=5)
-            entries[key] = entry
-        
-        def guardar():
-            if not self.on_actualizar:
-                return
-            
-            id_usuario = entries['id'].get().strip()
-            nombre = entries['nombre'].get().strip()
-            email = entries['email'].get().strip()
-            
-            if not id_usuario or not nombre:
-                messagebox.showerror("Error", "ID y Nombre son obligatorios")
-                return
-            
-            # Obtener usuarios actuales
-            datos = self.on_actualizar()
-            if id_usuario in datos['usuarios']:
-                messagebox.showerror("Error", "El ID ya existe")
-                return
-            
-            # Agregar usuario directamente al sistema
-            datos['usuarios'][id_usuario] = {'nombre': nombre, 'email': email}
-            
-            # Guardar (necesitamos acceso al sistema)
-            if hasattr(self, 'controlador') and self.controlador:
-                self.controlador.sistema.usuarios = datos['usuarios']
-                self.controlador.sistema.guardar_datos()
-            
-            messagebox.showinfo("Éxito", "Usuario agregado")
-            dialog.destroy()
-            self.actualizar()
-        
-        frame_btns = tk.Frame(dialog)
-        frame_btns.grid(row=len(campos), column=0, columnspan=2, pady=20)
-        
-        tk.Button(
-            frame_btns,
-            text="Guardar",
-            command=guardar,
-            bg='#27ae60',
-            fg='white',
-            font=('Arial', 10, 'bold'),
-            width=15
-        ).pack(side=tk.LEFT, padx=5)
-        
-        tk.Button(
-            frame_btns,
-            text="Cancelar",
-            command=dialog.destroy,
-            bg='#e74c3c',
-            fg='white',
-            font=('Arial', 10, 'bold'),
-            width=15
-        ).pack(side=tk.LEFT, padx=5)
+    # ========== DETALLES ==========
     
     def _ver_detalles(self, event):
         """Muestra detalles del elemento al hacer doble clic."""
@@ -760,6 +834,8 @@ Total préstamos: {info['total_prestamos']}
             font=('Arial', 10, 'bold'),
             width=15
         ).pack(pady=10)
+    
+    # ========== REPORTES ==========
     
     def _ver_reporte(self):
         """Muestra el reporte del sistema."""

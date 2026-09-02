@@ -23,6 +23,8 @@ class Controlador:
         self.vista.on_editar = self.editar
         self.vista.on_reporte = self.reporte
         self.vista.on_estadisticas = self.estadisticas
+        self.vista.on_agregar_usuario = self.agregar_usuario
+        self.vista.on_eliminar_usuario = self.eliminar_usuario
     
     def actualizar(self):
         """Obtiene los datos actualizados del modelo."""
@@ -30,12 +32,13 @@ class Controlador:
             'elementos': self.sistema.elementos,
             'estadisticas': self.sistema.estadisticas(),
             'usuarios': self.sistema.usuarios,
-            'categorias': list(self.sistema.categorias.keys())
+            'categorias': list(self.sistema.categorias.keys()),
+            'nombres_usuarios': self.sistema.obtener_nombres_usuarios()
         }
     
-    def prestar(self, codigo, usuario_id):
-        """Realiza un préstamo."""
-        return self.sistema.prestar(codigo, usuario_id)
+    def prestar(self, codigo, nombre_usuario):
+        """Realiza un préstamo usando el nombre del usuario."""
+        return self.sistema.prestar(codigo, nombre_usuario)
     
     def devolver(self, codigo):
         """Realiza una devolución."""
@@ -66,16 +69,13 @@ class Controlador:
         if not e:
             return False, "Elemento no encontrado"
         
-        # Guardar categoría anterior
         cat_anterior = e.categoria
         
-        # Actualizar datos
         e.nombre = datos.get('nombre', e.nombre)
         e.categoria = datos.get('categoria', e.categoria)
         e.descripcion = datos.get('descripcion', e.descripcion)
         e.ubicacion = datos.get('ubicacion', e.ubicacion)
         
-        # Mover de categoría si cambió
         if cat_anterior != e.categoria:
             if cat_anterior in self.sistema.categorias:
                 self.sistema.categorias[cat_anterior] = [
@@ -96,3 +96,11 @@ class Controlador:
     def estadisticas(self):
         """Obtiene estadísticas."""
         return self.sistema.estadisticas()
+    
+    def agregar_usuario(self, nombre, email, telefono):
+        """Agrega un nuevo usuario."""
+        return self.sistema.agregar_usuario(nombre, email, telefono)
+    
+    def eliminar_usuario(self, nombre):
+        """Elimina un usuario."""
+        return self.sistema.eliminar_usuario(nombre)

@@ -109,7 +109,7 @@ class Sistema:
     
     def __init__(self):
         self.elementos = []
-        self.usuarios = {}
+        self.usuarios = []
         self.categorias = {}
         self.cargar_datos()
     
@@ -131,7 +131,7 @@ class Sistema:
                     self.categorias[e.categoria].append(e)
                 
                 # Cargar usuarios
-                self.usuarios = datos.get('usuarios', {})
+                self.usuarios = datos.get('usuarios', [])
                 return
             except:
                 pass
@@ -152,7 +152,7 @@ class Sistema:
             pass
     
     def _cargar_ejemplos(self):
-        """Carga elementos de ejemplo."""
+        """Carga elementos y usuarios de ejemplo."""
         # Categorías
         categorias = ["Deportes", "Informática", "Audiovisuales", "Herramientas"]
         for cat in categorias:
@@ -178,15 +178,57 @@ class Sistema:
             self.categorias[cat].append(e)
         
         # Usuarios
-        self.usuarios = {
-            "U-001": {"nombre": "Juan Pérez", "email": "juan@mail.com"},
-            "U-002": {"nombre": "María García", "email": "maria@mail.com"},
-            "U-003": {"nombre": "Carlos López", "email": "carlos@mail.com"}
-        }
+        self.usuarios = [
+            {"nombre": "Juan Pérez", "email": "juan@mail.com", "telefono": "555-0101"},
+            {"nombre": "María García", "email": "maria@mail.com", "telefono": "555-0102"},
+            {"nombre": "Carlos López", "email": "carlos@mail.com", "telefono": "555-0103"}
+        ]
         
         self.guardar_datos()
     
-    # ===== OPERACIONES =====
+    # ===== OPERACIONES CON USUARIOS =====
+    
+    def agregar_usuario(self, nombre, email="", telefono=""):
+        """Agrega un nuevo usuario."""
+        for u in self.usuarios:
+            if u['nombre'].lower() == nombre.lower():
+                return False, "Ya existe un usuario con ese nombre"
+        
+        self.usuarios.append({
+            'nombre': nombre,
+            'email': email,
+            'telefono': telefono
+        })
+        self.guardar_datos()
+        return True, "Usuario agregado"
+    
+    def eliminar_usuario(self, nombre):
+        """Elimina un usuario por su nombre."""
+        for i, u in enumerate(self.usuarios):
+            if u['nombre'].lower() == nombre.lower():
+                # Verificar que no tenga préstamos activos
+                for e in self.elementos:
+                    if e.usuario_actual == u['nombre'] and not e.disponible:
+                        return False, "El usuario tiene préstamos activos"
+                
+                self.usuarios.pop(i)
+                self.guardar_datos()
+                return True, "Usuario eliminado"
+        
+        return False, "Usuario no encontrado"
+    
+    def buscar_usuario(self, nombre):
+        """Busca un usuario por nombre."""
+        for u in self.usuarios:
+            if u['nombre'].lower() == nombre.lower():
+                return u
+        return None
+    
+    def obtener_nombres_usuarios(self):
+        """Obtiene solo los nombres de los usuarios."""
+        return [u['nombre'] for u in self.usuarios]
+    
+    # ===== OPERACIONES CON ELEMENTOS =====
     
     def buscar_elemento(self, codigo):
         for e in self.elementos:
@@ -199,7 +241,6 @@ class Sistema:
         return [e for e in self.elementos if texto in e.nombre.lower()]
     
     def agregar_elemento(self, elemento):
-        # Verificar que no exista
         if self.buscar_elemento(elemento.codigo):
             return False
         
@@ -222,16 +263,18 @@ class Sistema:
         self.guardar_datos()
         return True
     
-    def prestar(self, codigo, usuario_id):
+    def prestar(self, codigo, nombre_usuario):
+        """Realiza un préstamo usando el nombre del usuario."""
         e = self.buscar_elemento(codigo)
         if not e:
             return False, "Elemento no encontrado"
         
-        if usuario_id not in self.usuarios:
-            return False, "Usuario no encontrado"
+        usuario = self.buscar_usuario(nombre_usuario)
+        if not usuario:
+            return False, f"Usuario '{nombre_usuario}' no encontrado"
         
-        usuario_nombre = self.usuarios[usuario_id]['nombre']
-        resultado, mensaje = e.prestar(usuario_nombre)
+        nombre = usuario['nombre']
+        resultado, mensaje = e.prestar(nombre)
         
         if resultado:
             self.guardar_datos()
@@ -288,5 +331,11 @@ class Sistema:
         texto += f"Prestados: {stats['prestados']}\n"
         texto += f"Categorías: {stats['categorias']}\n"
         texto += f"Usuarios: {stats['usuarios']}\n\n"
-        texto += "="*50 + "\n"
+        
+        texto += "USUARIOS REGISTRADOS:\n"
+        texto += "-"*30 + "\n"
+        for u in self.usuarios:
+            texto += f"  • {u['nombre']} - {u.get('email', '')} - {u.get('telefono', '')}\n"
+        
+        texto += "\n" + "="*50 + "\n"
         return texto

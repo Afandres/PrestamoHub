@@ -6,16 +6,10 @@
       "categoria": "Deportes",
       "descripcion": "Talla 5",
       "ubicacion": "Bodega",
-      "disponible": false,
-      "usuario_actual": "María García",
-      "fecha_prestamo": "2026-09-01T20:26:11.429473",
-      "historial": [
-        {
-          "fecha": "01/09/2026 20:26",
-          "accion": "PRESTAMO",
-          "usuario": "María García"
-        }
-      ]
+      "disponible": true,
+      "usuario_actual": null,
+      "fecha_prestamo": null,
+      "historial": []
     },
     {
       "codigo": "EL-002",
@@ -117,18 +111,21 @@
       "historial": []
     }
   ],
-  "usuarios": {
-    "U-001": {
+  "usuarios": [
+    {
       "nombre": "Juan Pérez",
-      "email": "juan@mail.com"
+      "email": "juan@mail.com",
+      "telefono": "555-0101"
     },
-    "U-002": {
+    {
       "nombre": "María García",
-      "email": "maria@mail.com"
+      "email": "maria@mail.com",
+      "telefono": "555-0102"
     },
-    "U-003": {
+    {
       "nombre": "Carlos López",
-      "email": "carlos@mail.com"
+      "email": "carlos@mail.com",
+      "telefono": "555-0103"
     }
-  }
+  ]
 }
