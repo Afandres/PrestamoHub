@@ -1,0 +1,134 @@
+{
+  "elementos": [
+    {
+      "codigo": "EL-001",
+      "nombre": "Balón de fútbol",
+      "categoria": "Deportes",
+      "descripcion": "Talla 5",
+      "ubicacion": "Bodega",
+      "disponible": false,
+      "usuario_actual": "María García",
+      "fecha_prestamo": "2026-09-01T20:26:11.429473",
+      "historial": [
+        {
+          "fecha": "01/09/2026 20:26",
+          "accion": "PRESTAMO",
+          "usuario": "María García"
+        }
+      ]
+    },
+    {
+      "codigo": "EL-002",
+      "nombre": "Balón de baloncesto",
+      "categoria": "Deportes",
+      "descripcion": "Talla 7",
+      "ubicacion": "Bodega",
+      "disponible": true,
+      "usuario_actual": null,
+      "fecha_prestamo": null,
+      "historial": []
+    },
+    {
+      "codigo": "EL-003",
+      "nombre": "Computador portátil",
+      "categoria": "Informática",
+      "descripcion": "16GB RAM",
+      "ubicacion": "Oficina",
+      "disponible": true,
+      "usuario_actual": null,
+      "fecha_prestamo": null,
+      "historial": []
+    },
+    {
+      "codigo": "EL-004",
+      "nombre": "Mouse inalámbrico",
+      "categoria": "Informática",
+      "descripcion": "Logitech",
+      "ubicacion": "Oficina",
+      "disponible": true,
+      "usuario_actual": null,
+      "fecha_prestamo": null,
+      "historial": []
+    },
+    {
+      "codigo": "EL-005",
+      "nombre": "Teclado mecánico",
+      "categoria": "Informática",
+      "descripcion": "RGB",
+      "ubicacion": "Oficina",
+      "disponible": true,
+      "usuario_actual": null,
+      "fecha_prestamo": null,
+      "historial": []
+    },
+    {
+      "codigo": "EL-006",
+      "nombre": "Videobeam",
+      "categoria": "Audiovisuales",
+      "descripcion": "Epson EB-2000",
+      "ubicacion": "Sala A",
+      "disponible": true,
+      "usuario_actual": null,
+      "fecha_prestamo": null,
+      "historial": []
+    },
+    {
+      "codigo": "EL-007",
+      "nombre": "Cámara réflex",
+      "categoria": "Audiovisuales",
+      "descripcion": "Canon EOS",
+      "ubicacion": "Estudio",
+      "disponible": true,
+      "usuario_actual": null,
+      "fecha_prestamo": null,
+      "historial": []
+    },
+    {
+      "codigo": "EL-008",
+      "nombre": "Trípode",
+      "categoria": "Audiovisuales",
+      "descripcion": "Profesional",
+      "ubicacion": "Estudio",
+      "disponible": true,
+      "usuario_actual": null,
+      "fecha_prestamo": null,
+      "historial": []
+    },
+    {
+      "codigo": "EL-009",
+      "nombre": "Taladro",
+      "categoria": "Herramientas",
+      "descripcion": "Bosch percutor",
+      "ubicacion": "Taller",
+      "disponible": true,
+      "usuario_actual": null,
+      "fecha_prestamo": null,
+      "historial": []
+    },
+    {
+      "codigo": "EL-010",
+      "nombre": "Multímetro",
+      "categoria": "Herramientas",
+      "descripcion": "Fluke 117",
+      "ubicacion": "Taller",
+      "disponible": true,
+      "usuario_actual": null,
+      "fecha_prestamo": null,
+      "historial": []
+    }
+  ],
+  "usuarios": {
+    "U-001": {
+      "nombre": "Juan Pérez",
+      "email": "juan@mail.com"
+    },
+    "U-002": {
+      "nombre": "María García",
+      "email": "maria@mail.com"
+    },
+    "U-003": {
+      "nombre": "Carlos López",
+      "email": "carlos@mail.com"
+    }
+  }
+}
