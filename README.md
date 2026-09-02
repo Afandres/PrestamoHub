@@ -1,7 +1,7 @@
 # 📦 PrestamoHub - Sistema de Gestión de Préstamo de Elementos
 
 **Versión:** 1.0.  
-**Fecha:** 2024  
+**Fecha:** 2026
 
 ---
 
