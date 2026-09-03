@@ -6,10 +6,26 @@
       "categoria": "Deportes",
       "descripcion": "Talla 5",
       "ubicacion": "Bodega",
-      "disponible": true,
-      "usuario_actual": null,
-      "fecha_prestamo": null,
-      "historial": []
+      "disponible": false,
+      "usuario_actual": "María García",
+      "fecha_prestamo": "2026-09-01T21:25:29.347333",
+      "historial": [
+        {
+          "fecha": "01/09/2026 21:24",
+          "accion": "PRESTAMO",
+          "usuario": "Juan Pérez"
+        },
+        {
+          "fecha": "01/09/2026 21:25",
+          "accion": "DEVOLUCION",
+          "usuario": "Juan Pérez"
+        },
+        {
+          "fecha": "01/09/2026 21:25",
+          "accion": "PRESTAMO",
+          "usuario": "María García"
+        }
+      ]
     },
     {
       "codigo": "EL-002",
